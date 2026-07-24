@@ -1,0 +1,10 @@
+{
+  "name": "Sai Teja T",
+  "phone": "+1(972) 836-9765",
+  "location": "Dallas, TX",
+  "visa": "H1B",
+  "experience_years": "4+",
+  "role": "DevOps Engineer",
+  "skills": "Terraform, Ansible, Docker, Kubernetes, Azure, AWS, Jenkins, ArgoCD, Prometheus, Grafana, ELK Stack",
+  "domains": "Cloud Infrastructure, CI/CD, Container Orchestration"
+}

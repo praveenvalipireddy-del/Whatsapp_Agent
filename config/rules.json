@@ -1,0 +1,33 @@
+{
+  "business_name": "Praveen — Bench Sales",
+  "signature": "— Praveen",
+  "tone": "Professional, concise, friendly. Never over-promise. Never share consultant SSN, DOB, or full visa documents over chat.",
+
+  "auto_send": {
+    "enabled": true,
+    "min_confidence": 0.75,
+    "allow_topics": [
+      "consultant_availability",
+      "rate_confirmation",
+      "visa_status",
+      "location",
+      "skills_summary",
+      "greeting_smalltalk"
+    ],
+    "trusted_vendors": []
+  },
+
+  "always_draft_topics": [
+    "rate_negotiation",
+    "submission_request",
+    "resume_request",
+    "interview_scheduling",
+    "contract_terms",
+    "anything_unclear"
+  ],
+
+  "never_share": [
+    "ssn", "date of birth", "dob", "passport number",
+    "i-94", "visa copy", "green card number", "full address"
+  ]
+}

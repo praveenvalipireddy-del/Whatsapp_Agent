@@ -1,0 +1,29 @@
+# Render blueprint — deploy the WhatsApp agent as an always-on web service.
+# In Render: New + > Blueprint > point at this repo. Set the secret env vars
+# (WHATSAPP_TOKEN, OPENROUTER_API_KEY, etc.) in the dashboard, not here.
+services:
+  - type: web
+    name: bench-sales-whatsapp
+    runtime: python
+    plan: free
+    rootDir: whatsapp_agent
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: VERIFY_TOKEN
+        sync: false
+      - key: APP_SECRET
+        sync: false
+      - key: LLM_PROVIDER
+        value: openrouter
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: nvidia/nemotron-3-super-120b-a12b:free
+      - key: ALLOWED_SENDERS
+        sync: false
