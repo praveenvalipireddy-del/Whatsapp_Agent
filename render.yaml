@@ -3,10 +3,9 @@
 # (WHATSAPP_TOKEN, OPENROUTER_API_KEY, etc.) in the dashboard, not here.
 services:
   - type: web
-    name: bench-sales-whatsapp
+    name: whatsapp-agent
     runtime: python
     plan: free
-    rootDir: whatsapp_agent
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
