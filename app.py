@@ -88,3 +88,27 @@ def _handle(wa_id: str, text: str):
 @app.get("/health")
 async def health():
     return {"ok": True, "pending_drafts": len(store.pending_drafts())}
+
+
+@app.get("/messages")
+async def messages(key: str = "", wa_id: str = ""):
+    """View stored conversations. Protected by ?key=<VERIFY_TOKEN>.
+    Open https://<your-app>/messages?key=<VERIFY_TOKEN> in a browser.
+    """
+    if key != VERIFY_TOKEN or not VERIFY_TOKEN:
+        return Response(status_code=403, content="Forbidden — add ?key=<VERIFY_TOKEN>")
+    rows = store.history(wa_id.lstrip("+")) if wa_id else store.recent_messages()
+    html = [
+        "<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>",
+        "<style>body{font-family:Arial;max-width:700px;margin:20px auto;padding:0 12px}",
+        ".vendor{background:#eee;padding:8px 12px;border-radius:10px;margin:6px 0}",
+        ".agent{background:#d9fdd3;padding:8px 12px;border-radius:10px;margin:6px 0;text-align:right}",
+        ".num{color:#888;font-size:12px}</style></head><body>",
+        f"<h3>Conversations ({len(rows)} messages)</h3>",
+    ]
+    for r in rows:
+        cls = "agent" if r["role"] == "agent" else "vendor"
+        who = "" if wa_id else f"<div class='num'>{r.get('wa_id','')}</div>"
+        html.append(f"{who}<div class='{cls}'>{r['body']}</div>")
+    html.append("</body></html>")
+    return Response(content="\n".join(html), media_type="text/html")

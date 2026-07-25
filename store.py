@@ -52,6 +52,16 @@ def history(wa_id, limit=20):
     return [{"role": r["role"], "body": r["body"]} for r in reversed(rows)]
 
 
+def recent_messages(limit=100):
+    """All messages across every number, newest first — for the view page."""
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT wa_id, role, body, ts FROM messages ORDER BY id DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def add_draft(wa_id, body, topic):
     with _conn() as c:
         cur = c.execute(
