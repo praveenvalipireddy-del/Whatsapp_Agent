@@ -90,6 +90,45 @@ async def health():
     return {"ok": True, "pending_drafts": len(store.pending_drafts())}
 
 
+_SEND_FORM = """<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>
+<style>body{{font-family:Arial;max-width:500px;margin:30px auto;padding:0 14px}}
+input,textarea{{width:100%;padding:10px;margin:6px 0;font-size:16px;box-sizing:border-box}}
+button{{background:#25d366;color:#fff;border:0;padding:12px;font-size:16px;border-radius:8px;width:100%}}
+.msg{{padding:10px;border-radius:8px;margin:8px 0}}.ok{{background:#d9fdd3}}.err{{background:#ffd6d6}}</style>
+</head><body><h3>Send WhatsApp message</h3><p style='color:#888'>From 555-176-8068</p>
+{status}
+<form method='post' action='/send?key={key}'>
+<label>To (number with country code, no +)</label>
+<input name='to' placeholder='19495943404' value='{to}' required>
+<label>Message</label>
+<textarea name='body' rows='4' placeholder='Type your message...' required></textarea>
+<button type='submit'>Send</button></form></body></html>"""
+
+
+@app.get("/send")
+async def send_form(key: str = "", to: str = ""):
+    if key != VERIFY_TOKEN or not VERIFY_TOKEN:
+        return Response(status_code=403, content="Forbidden — add ?key=<VERIFY_TOKEN>")
+    return Response(content=_SEND_FORM.format(status="", key=key, to=to), media_type="text/html")
+
+
+@app.post("/send")
+async def send_message(request: Request, key: str = ""):
+    if key != VERIFY_TOKEN or not VERIFY_TOKEN:
+        return Response(status_code=403, content="Forbidden")
+    form = await request.form()
+    to = str(form.get("to", "")).lstrip("+")
+    body = str(form.get("body", ""))
+    try:
+        whatsapp.send_text(to, body)
+        store.add_message(to, "agent", body)
+        status = f"<div class='msg ok'>Sent to {to}</div>"
+    except Exception as e:
+        detail = getattr(getattr(e, "response", None), "text", str(e))
+        status = f"<div class='msg err'>Failed: {detail[:200]}</div>"
+    return Response(content=_SEND_FORM.format(status=status, key=key, to=to), media_type="text/html")
+
+
 @app.get("/messages")
 async def messages(key: str = "", wa_id: str = ""):
     """View stored conversations. Protected by ?key=<VERIFY_TOKEN>.
