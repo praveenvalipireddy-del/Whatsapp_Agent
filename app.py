@@ -90,6 +90,33 @@ async def health():
     return {"ok": True, "pending_drafts": len(store.pending_drafts())}
 
 
+@app.get("/privacy")
+async def privacy():
+    """Simple privacy policy page — use its URL when Meta asks for one to go Live."""
+    html = """<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Privacy Policy</title>
+<style>body{font-family:Arial;max-width:720px;margin:30px auto;padding:0 16px;line-height:1.6;color:#222}</style>
+</head><body>
+<h1>Privacy Policy</h1>
+<p>This WhatsApp messaging service is operated by O2 Technologies for the purpose of
+communicating with staffing vendors and recruiters about consultant availability.</p>
+<h3>Information we handle</h3>
+<p>We process WhatsApp messages you send to our business number in order to respond to
+your inquiries about our consultants. We may store message content and your phone number
+to maintain conversation context and improve our responses.</p>
+<h3>How we use it</h3>
+<p>Message data is used solely to reply to your inquiries. We do not sell your information.
+We do not share it with third parties except service providers that help operate this
+service (e.g. messaging and AI infrastructure).</p>
+<h3>Data retention</h3>
+<p>Conversation data is retained only as long as needed to service your inquiry.</p>
+<h3>Contact</h3>
+<p>For any privacy questions or to request deletion of your data, contact
+Praveen at O2 Technologies.</p>
+</body></html>"""
+    return Response(content=html, media_type="text/html")
+
+
 _SEND_FORM = """<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>
 <style>body{{font-family:Arial;max-width:500px;margin:30px auto;padding:0 14px}}
 input,textarea{{width:100%;padding:10px;margin:6px 0;font-size:16px;box-sizing:border-box}}
