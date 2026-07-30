@@ -31,6 +31,43 @@ def send_text(to, body):
     return r.json()
 
 
+def _upload_media(file_path):
+    """Upload a document to WhatsApp; return its media id."""
+    import mimetypes
+
+    mime = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+    with open(file_path, "rb") as f:
+        files = {"file": (os.path.basename(file_path), f, mime)}
+        data = {"messaging_product": "whatsapp", "type": mime}
+        r = httpx.post(
+            f"{GRAPH}/{os.environ['PHONE_NUMBER_ID']}/media",
+            headers={"Authorization": f"Bearer {os.environ['WHATSAPP_TOKEN']}"},
+            data=data,
+            files=files,
+            timeout=60,
+        )
+    r.raise_for_status()
+    return r.json()["id"]
+
+
+def send_document(to, file_path, filename=None, caption=None):
+    """Upload and send a document (resume) to a recipient."""
+    media_id = _upload_media(file_path)
+    doc = {"id": media_id, "filename": filename or os.path.basename(file_path)}
+    if caption:
+        doc["caption"] = caption
+    payload = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": to,
+        "type": "document",
+        "document": doc,
+    }
+    r = httpx.post(_url(), headers=_headers(), json=payload, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+
 def send_template(to, template_name, lang="en_US", components=None):
     """Send a pre-approved template (use outside the 24h window / for outreach)."""
     payload = {

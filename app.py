@@ -13,6 +13,7 @@ from fastapi import FastAPI, Request, Response
 
 load_dotenv()
 
+import consultants
 import store
 import whatsapp
 from brain import generate
@@ -68,6 +69,22 @@ def _handle(wa_id: str, text: str):
     result = generate(hist[:-1], text)  # hist already includes this msg; pass prior
 
     reply, topic, decision = result["reply"], result["topic"], result["decision"]
+
+    # If the vendor asked for a specific consultant's resume and we have the file,
+    # send the reply plus the document automatically.
+    resume_path, resume_name = consultants.resume_for(result.get("resume_for", ""))
+    if resume_path:
+        try:
+            whatsapp.send_text(wa_id, reply)
+            whatsapp.send_document(wa_id, resume_path, filename=resume_name)
+            store.add_message(wa_id, "agent", reply)
+            store.add_message(wa_id, "agent", f"[sent resume: {resume_name}]")
+            print(f"[RESUME->{wa_id}] {resume_name}")
+        except Exception as e:
+            detail = getattr(getattr(e, "response", None), "text", str(e))
+            draft_id = store.add_draft(wa_id, reply, topic)
+            print(f"[RESUME SEND FAILED -> DRAFT #{draft_id} for {wa_id}] {detail}")
+        return
 
     if decision == "auto":
         try:

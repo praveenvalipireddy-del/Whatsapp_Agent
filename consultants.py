@@ -26,6 +26,26 @@ def load_consultants():
     return out
 
 
+def resume_for(name):
+    """Return (abs_path, filename) of a consultant's resume by name, or (None, None).
+
+    Matches on full name or first name, case-insensitive.
+    """
+    if not name:
+        return None, None
+    needle = name.strip().lower()
+    for c in load_consultants():
+        cname = c.get("name", "").lower()
+        rel = c.get("resume")
+        if not rel:
+            continue
+        if needle == cname or needle in cname or cname.split()[0] == needle.split()[0]:
+            path = Path(__file__).resolve().parent / rel
+            if path.exists():
+                return str(path), path.name
+    return None, None
+
+
 def consultants_summary():
     """Compact text block describing available consultants for the system prompt."""
     lines = []
